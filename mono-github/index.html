@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f7f7f2">
+  <meta name="description" content="在你的设备上，一键转换 Logo 和二维码的黑白颜色，支持透明背景和原尺寸 PNG 下载。">
+  <title>MONO · 黑白之间</title>
+  <link rel="icon" href="logo.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="style.css"><script src="demo-qr.js" defer></script><script src="app.js" defer></script>
+</head>
+<body>
+  <svg class="icon-definitions" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"><defs><symbol id="mono-mark" viewBox="0 0 800 800" fill="currentColor" stroke="none"><path id="logo-ribbon" d="M165 390C108 351 132 276 206 277C284 278 370 376 448 354C496 340 520 299 477 268C440 241 380 256 337 290C308 221 349 158 422 147C515 132 594 191 591 264C588 339 523 399 452 408C359 421 297 348 265 369C248 380 241 397 238 413C208 416 184 406 165 390Z"/><path d="M165 390C108 351 132 276 206 277C284 278 370 376 448 354C496 340 520 299 477 268C440 241 380 256 337 290C308 221 349 158 422 147C515 132 594 191 591 264C588 339 523 399 452 408C359 421 297 348 265 369C248 380 241 397 238 413C208 416 184 406 165 390Z" transform="rotate(180 400 400)"/></symbol></defs></svg>
+  <div class="page">
+    <header><a class="brand" href="./" aria-label="MONO 首页"><svg class="brand-mark" viewBox="0 0 800 800" aria-hidden="true"><use href="#mono-mark"/></svg>MONO</a><div class="header-meta"><a class="creator" href="https://www.xiaohongshu.com/user/profile/5fd0f2c00000000001009459" target="_blank" rel="noopener noreferrer">小红书 @Figma男人</a><span class="privacy">本地处理 <span>·</span> 无需上传服务器</span></div></header>
+    <main>
+      <section class="intro"><div><h1><span>Logo / 二维码，</span><span>黑白一键换。</span></h1><p>上传图片 → 选择颜色与背景 → 下载 PNG</p></div></section>
+      <section class="workspace" aria-label="黑白转换工作台">
+        <aside class="settings">
+          <h2><span>01</span>上传素材</h2>
+          <input id="file" type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml" hidden>
+          <button id="upload" class="dropzone"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4m-4 4 4-4 4 4M5 15H3v4a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-4h-2"/></svg><strong>拖入图片，或点击上传</strong><span>PNG · JPG · WEBP · SVG</span></button>
+          <p class="small-label">尝试示例</p>
+          <div class="examples"><button id="logo-demo"><svg viewBox="0 0 800 800" aria-hidden="true"><use href="#mono-mark"/></svg>Logo</button><button id="qr-demo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3h6v6H3zM15 3h6v6h-6zM3 15h6v6H3zM15 15h3v3h3v3h-6zM21 12v2M12 3v6M3 12h6M12 18v3"/></svg>二维码</button></div>
+          <div class="rule"></div>
+          <h2><span>02</span>转换设置</h2>
+          <fieldset><legend>前景 <span>（图形颜色）</span></legend><div class="choices" data-setting="foreground"><button data-value="black"><i class="swatch black"></i>黑色</button><button data-value="white"><i class="swatch white"></i>白色</button></div></fieldset>
+          <fieldset><legend>背景</legend><div class="choices" data-setting="background"><button data-value="transparent"><i class="swatch checker"></i>透明</button><button data-value="white"><i class="swatch white"></i>白色</button><button data-value="black"><i class="swatch black"></i>黑色</button></div></fieldset>
+          <details id="source-options"><summary>原图前景识别 <span id="detected">透明图形</span></summary><div class="choices" data-setting="source"><button data-value="auto">自动</button><button data-value="black">黑色</button><button data-value="white">白色</button></div><p>有实色底时，可手动选择原图的图形颜色。</p></details>
+          <button id="download" class="download"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m-4-4 4 4 4-4M4 16v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></svg><span>下载 PNG</span></button>
+          <p id="message" role="status" aria-live="polite"></p>
+        </aside>
+        <div class="preview">
+          <h2>预览</h2>
+          <div class="comparison"><div class="image-column"><div class="preview-label">原图</div><div class="image-frame checker"><canvas id="original" aria-label="原图预览"></canvas></div></div><button id="swap" class="swap" aria-label="切换黑白" title="切换黑白"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9a8 8 0 0 1 13-4l3 3m0-5v5h-5M20 15a8 8 0 0 1-13 4l-3-3m0 5v-5h5"/></svg></button><div class="image-column"><div class="preview-label">转换后</div><div id="result-frame" class="image-frame"><canvas id="result" aria-label="转换后的图片预览"></canvas></div></div></div>
+          <p id="metadata" class="metadata"></p>
+          <div class="benefits"><div><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3m13-5h3a2 2 0 0 1 2 2v3M3 16v3a2 2 0 0 0 2 2h3m13-5v3a2 2 0 0 1-2 2h-3M8 8h8v8H8z"/></svg><div><strong>原始尺寸</strong><p>保持原图尺寸输出，不放大或压缩。</p></div></div><div><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 17c4 0 4-10 9-10s5 10 9 10M3 7v3m18-3v3"/><circle cx="12" cy="7" r="2"/></svg><div><strong>保留清晰边缘</strong><p>保留透明边缘，让图形自然融入。</p></div></div><div><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 4 6v6c0 4 4 7 8 9 4-2 8-5 8-9V6l-8-3M8 12l3 3 5-5"/></svg><div><strong>图片只留在你的设备</strong><p>本地处理，无需上传，保护你的隐私。</p></div></div></div>
+        </div>
+      </section>
+    </main>
+  </div>
+</body>
+</html>
