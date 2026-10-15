@@ -2,22 +2,41 @@ const $ = (id) => document.getElementById(id);
 const original = $('original');
 const result = $('result');
 const state = { foreground: 'white', background: 'black', source: 'auto' };
-let pixels, hasTransparency, inferredSource, filename, loadVersion = 0;
+let pixels, useTransparencyMask, inferredSource, filename, loadVersion = 0;
 
 function rememberImage(name) {
   pixels = original.getContext('2d', { willReadFrequently: true }).getImageData(0, 0, original.width, original.height);
-  hasTransparency = false;
-  let borderLight = 0, borderCount = 0;
+  let hasTransparency = false, visibleWeight = 0, borderWeight = 0;
   const { data, width, height } = pixels;
+  const tones = new Float64Array(256), borderTones = new Float64Array(256);
+  const borderSize = Math.max(1, Math.floor(Math.min(width, height) * .02));
   for (let i = 0; i < data.length; i += 4) {
     if (data[i + 3] < 250) hasTransparency = true;
+    const alpha = data[i + 3] / 255;
+    // Transparent RGB values are not evidence of a black background.
+    if (alpha < .1) continue;
+    const light = Math.round(.2126 * data[i] + .7152 * data[i + 1] + .0722 * data[i + 2]);
+    tones[light] += alpha;
+    visibleWeight += alpha;
     const index = i / 4, x = index % width, y = Math.floor(index / width);
-    if (x === 0 || y === 0 || x === width - 1 || y === height - 1) {
-      borderLight += (data[i] + data[i + 1] + data[i + 2]) / 3;
-      borderCount++;
+    if (x < borderSize || y < borderSize || x >= width - borderSize || y >= height - borderSize) {
+      borderTones[light] += alpha;
+      borderWeight += alpha;
     }
   }
-  inferredSource = borderLight / borderCount > 127 ? 'black' : 'white';
+  const percentile = (histogram, weight, fraction) => {
+    let count = 0;
+    for (let tone = 0; tone < 256; tone++) {
+      count += histogram[tone];
+      if (count > weight * fraction) return tone;
+    }
+    return 255;
+  };
+  const contrast = percentile(tones, visibleWeight, .995) - percentile(tones, visibleWeight, .005);
+  // A transparent corner does not make a white/black card a transparent logo.
+  useTransparencyMask = hasTransparency && contrast < 48;
+  const background = borderWeight ? percentile(borderTones, borderWeight, .5) : percentile(tones, visibleWeight, .5);
+  inferredSource = background > 127 ? 'black' : 'white';
   filename = name;
   state.source = 'auto';
   $('metadata').textContent = `${name} · ${width} × ${height} px`;
@@ -34,7 +53,7 @@ function render() {
   const output = context.createImageData(width, height);
   const color = state.foreground === 'white' ? 255 : 0;
   const background = state.background === 'white' ? 255 : 0;
-  const useAlpha = hasTransparency && state.source === 'auto';
+  const useAlpha = state.source === 'alpha' || (useTransparencyMask && state.source === 'auto');
   const source = state.source === 'auto' ? inferredSource : state.source;
   for (let i = 0; i < data.length; i += 4) {
     const light = (0.2126 * data[i] + 0.7152 * data[i + 1] + 0.0722 * data[i + 2]) / 255;
