@@ -25,7 +25,7 @@
           <h2><span>02</span>转换设置</h2>
           <fieldset><legend>前景 <span>（图形颜色）</span></legend><div class="choices" data-setting="foreground"><button data-value="black"><i class="swatch black"></i>黑色</button><button data-value="white"><i class="swatch white"></i>白色</button></div></fieldset>
           <fieldset><legend>背景</legend><div class="choices" data-setting="background"><button data-value="transparent"><i class="swatch checker"></i>透明</button><button data-value="white"><i class="swatch white"></i>白色</button><button data-value="black"><i class="swatch black"></i>黑色</button></div></fieldset>
-          <details id="source-options"><summary>原图前景识别 <span id="detected">透明图形</span></summary><div class="choices" data-setting="source"><button data-value="auto">自动</button><button data-value="black">黑色</button><button data-value="white">白色</button></div><p>有实色底时，可手动选择原图的图形颜色。</p></details>
+          <details id="source-options"><summary>原图前景识别 <span id="detected">透明图形</span></summary><div class="choices" data-setting="source"><button data-value="auto">自动</button><button data-value="black">黑色</button><button data-value="white">白色</button><button data-value="alpha">透明</button></div><p>有底色时选择原图的黑色或白色前景；透明底 Logo 可选择「透明」保留轮廓。</p></details>
           <button id="download" class="download"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m-4-4 4 4 4-4M4 16v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></svg><span>下载 PNG</span></button>
           <p id="message" role="status" aria-live="polite"></p>
         </aside>
